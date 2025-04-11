@@ -20,7 +20,10 @@
 
         {#each blogs as blog }
         <div class="prose bg-white w-[50%] h-[15rem] p-4 mx-auto my-4 rounded xl overflow-y-auto overflow-x-hidden relative">
-            <button on:click={() => deletePost(blog?.id)} class="size-4 right-0 absolute m-4 hover:cursor-pointer"><GoX/></button>
+            
+                <button on:click={() => {}} class="top-2 w-auto p-2 rounded-xl right-12 absolute  bg-gray-400 transition ease-in-out hover:bg-gray-700 hover:text-white hover:cursor-pointer">Edit</button>
+                <button on:click={() => deletePost(blog?.id)} class="top-2 size-4 right-0 absolute m-4 hover:cursor-pointer"><GoX/></button>
+                
             {@html marked.parse(blog?.content)}
         </div>
         {/each}
