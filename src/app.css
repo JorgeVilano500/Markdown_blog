@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+
+div > h1 {
+    font-size: 30px;
+    font-weight: bold;
+}
+div >  h2 {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+div >  h3 {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+
+
+div >  p {
+    font-size: 15px;
+    font-weight: 400;
+}
+
+div >  li {
+    font-style: italic;
+}
+
+div > p > img {
+    width: 10rem;
+    height: 10rem;
+}
