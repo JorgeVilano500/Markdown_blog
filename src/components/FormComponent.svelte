@@ -3,8 +3,8 @@
     import IoIosArrowDown from 'svelte-icons/io/IoIosArrowDown.svelte'
     import IoIosArrowUp from 'svelte-icons/io/IoIosArrowUp.svelte'
     import {marked} from 'marked';
-    let title = '';
-    let content = '';
+    export let title: string ;
+    export let content: string ;
     let showBlogForm = false;
 
     export let addPost;

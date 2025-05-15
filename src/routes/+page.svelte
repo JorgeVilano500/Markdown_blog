@@ -17,7 +17,9 @@
         posts: Post[];
     }
 
-    let blogs = data.posts
+    let blogs = data.posts 
+    let title = '';
+    let content = '';
 
     async function deletePost(id: string) {
         const formData = new FormData();
@@ -61,9 +63,10 @@
                 content: content, 
                 title: title
             }
-            console.log(blogs)
 
             blogs.push(newBlog)
+
+            
 
         //   console.log(JSON.parse(blogResponse.data))
             await invalidate('/');
@@ -78,10 +81,10 @@
 <section>
     <h1 class="text-center text-3xl font-semibold my-4">Write To Blog</h1>
 
-    <FormComponent addPost={addPost} />
+    <FormComponent title={title} content={content} addPost={addPost} />
  
 
-   <FormHistoryComponent deletePost={deletePost} blogs={blogs} />
+    <FormHistoryComponent deletePost={deletePost} blogs={blogs} />
 
 </section>
 
