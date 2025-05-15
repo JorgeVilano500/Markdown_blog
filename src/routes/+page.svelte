@@ -112,9 +112,7 @@
 </section>
 
 <style>
-    @reference "tailwindcss";
+ 
 
-:global(html) {
-    background-color: theme(--color-gray-100);
-  }
+
 </style>
