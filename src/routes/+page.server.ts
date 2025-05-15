@@ -43,12 +43,14 @@ export const actions: Actions = {
 
         // throw redirect(303, '/');
         return {success: true, data: blogData}
-    }
+    },
+
 }
+
+
 
 export const load: PageServerLoad = async () => {
     const {data: posts, error} = await supabase.from('markdown_blog_table').select('*').order('created_at', {ascending: false})
-
 
     if(error) {
         console.log(`Error fetching posts: ${error.message}`)

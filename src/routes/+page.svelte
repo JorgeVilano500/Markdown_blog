@@ -38,6 +38,29 @@
         }
     }
 
+    async function editPost(title: string, content: string, id: string) {
+        const formData = new FormData();
+        formData.append('title', title)
+        formData.append('content', content)
+        console.log('reached')
+
+        const res = await fetch('/', {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            method: 'PUT', 
+            body: formData
+        })
+
+
+        if(res.ok) {
+            await invalidate('/')
+        } else {
+            return window.alert('Edit Failed')
+        }
+
+    }
+
     async function addPost(title: string, content: string) {
         const formData = new FormData();
         formData.append('title', title)
@@ -84,7 +107,7 @@
     <FormComponent title={title} content={content} addPost={addPost} />
  
 
-    <FormHistoryComponent deletePost={deletePost} blogs={blogs} />
+    <FormHistoryComponent editPost={editPost} deletePost={deletePost} blogs={blogs} />
 
 </section>
 

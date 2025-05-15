@@ -30,3 +30,12 @@ div > p > img {
     width: 10rem;
     height: 10rem;
 }
+
+@layer base {
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  } 
+  /* for internship later */
