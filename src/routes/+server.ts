@@ -13,7 +13,7 @@ export async function PUT({request}: RequestEvent) {
     const content = formData.get('content')?.toString();
     const id = formData.get('id')?.toString();
 
-    console.log(title, id, content)
+   
 
     
 

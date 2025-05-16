@@ -40,20 +40,29 @@
 
     async function editPost(title: string, content: string, id: string) {
         const formData = new FormData();
-        formData.append('title', title)
+        // formData.append('title', title)
         formData.append('content', content)
+        formData.append('id', id);
         console.log('reached')
 
-        const res = await fetch('/', {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
+        const res = await fetch('/?editBlog', {
+            // headers: {
+            //     'Content-Type': 'application/x-www-form-urlencoded'
+            // },
             method: 'PUT', 
             body: formData
         })
 
 
         if(res.ok) {
+
+            blogs = blogs.map(blog => {
+                if(blog.id === id) {
+                    return {...blog, content: content}
+                }
+                return blog;
+            })
+
             await invalidate('/')
         } else {
             return window.alert('Edit Failed')

@@ -31,7 +31,7 @@
    {#if showBlogForm}
 
         {#each blogs as blog, i }
-        <div class="prose bg-white w-[50%] h-[15rem] p-4 mx-auto my-4 rounded xl overflow-y-auto overflow-x-hidden relative">
+        <div class="prose bg-white w-full h-[15rem] p-4 mx-auto my-4 rounded xl overflow-y-auto overflow-x-hidden relative">
             
             {#if onEdit && editIndex === i}
                 <button on:click={() => { onEdit = !onEdit;}} class="mx-2 top-2 w-auto p-2 rounded-xl right-26 absolute  bg-gray-400 transition ease-in-out hover:bg-gray-700 hover:text-white hover:cursor-pointer">Cancel</button>

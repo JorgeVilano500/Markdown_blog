@@ -44,6 +44,26 @@ export const actions: Actions = {
         // throw redirect(303, '/');
         return {success: true, data: blogData}
     },
+    editBlog: async ({request}: RequestEvent) => {
+        const formData = await request.formData();
+        // const title = formData.get('title')?.toString()
+        const content = formData.get('content')?.toString()
+        const id = formData.get('id')?.toString()
+
+        if (!content || !id) {
+            return fail(400, {error: 'Missing content, or id'})
+        }
+
+        const {data, error} = await supabase.from('markdown_blog_table').update({content: content}).eq('id', id).select();
+
+        if(error) {
+            console.log(`Supabase insert error ${error}`)
+            return fail(500, {error: error.message})
+        }
+
+        return {success: true, data: data }
+
+    }
 
 }
 
