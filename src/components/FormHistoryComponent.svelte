@@ -5,6 +5,7 @@
     import IoIosArrowUp from 'svelte-icons/io/IoIosArrowUp.svelte'
     import GoX from 'svelte-icons/go/GoX.svelte'
     let showBlogForm = false;
+    let showPreview = false;
     let title: string;
     let content: string;
     let editIndex:number;
@@ -51,14 +52,27 @@
                         <label class="text-black text-xl font-semibold" for="title">Title</label>
                         <input required name="title" bind:value={title} placeholder="Enter a title for your blog" class="w-full bg-white rounded-md border-gray-300 text-black px-2 py-1" type="text">
                     </div>
-                    <div class="mt-4">
-                        <label class="text-black text-xl font-semibold" for="description">Description</label>
-                        <textarea name="content" bind:value={content} rows="3" required placeholder="Describe your blog in detail" class="w-full bg-white rounded-md border-gray-300 text-black px-2 py-1" id="description"></textarea>
-                    </div>
-                    {@html marked.parse(blog?.content)}
+
+
+                    {#if showPreview}
+                        <section>
+                            <button class={`px-2 py-1  rounded ${!showPreview ? 'bg-gray-200' : 'bg-gray-800 text-gray-200'} cursor-pointer transition ease-in-out hover:bg-gray-200 hover:text-white `} on:click={() => showPreview = !showPreview}>{showPreview ? 'Edit' : 'Preview'}</button>
+                        </section>
+                        {@html marked.parse(blog?.content)}
+                    {:else}
+                        <div class="mt-4">
+                            <section>
+                    <button class={`px-2 py-1  rounded ${!showPreview ? 'bg-gray-200' : 'bg-gray-800 text-gray-200'} cursor-pointer transition ease-in-out hover:bg-gray-200 hover:text-white `} on:click={() => showPreview = !showPreview}>{showPreview ? 'Edit' : 'Preview'}</button>
+                            </section>
+                            <label class="text-black text-xl font-semibold" for="description">Description</label>
+                            <textarea name="content" bind:value={content} rows="3" required placeholder="Describe your blog in detail" class="w-full bg-white rounded-md border-gray-300 text-black px-2 py-1" id="description"></textarea>
+                        </div>
+                    {/if}
                 </div>
                 {:else}
-                    {@html marked.parse(blog?.content)}
+                    <div>
+                        {@html marked.parse(blog?.content)}
+                    </div>
                 {/if}
                 
         </div>

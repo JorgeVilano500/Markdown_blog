@@ -40,7 +40,7 @@
 
     async function editPost(title: string, content: string, id: string) {
         const formData = new FormData();
-        // formData.append('title', title)
+        formData.append('title', title)
         formData.append('content', content)
         formData.append('id', id);
         console.log('reached')
@@ -58,7 +58,7 @@
 
             blogs = blogs.map(blog => {
                 if(blog.id === id) {
-                    return {...blog, content: content}
+                    return {...blog, content: content, title: title}
                 }
                 return blog;
             })

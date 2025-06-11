@@ -46,7 +46,7 @@ export const actions: Actions = {
     },
     editBlog: async ({request}: RequestEvent) => {
         const formData = await request.formData();
-        // const title = formData.get('title')?.toString()
+        const title = formData.get('title')?.toString()
         const content = formData.get('content')?.toString()
         const id = formData.get('id')?.toString()
 
@@ -54,7 +54,7 @@ export const actions: Actions = {
             return fail(400, {error: 'Missing content, or id'})
         }
 
-        const {data, error} = await supabase.from('markdown_blog_table').update({content: content}).eq('id', id).select();
+        const {data, error} = await supabase.from('markdown_blog_table').update({content: content, title: title}).eq('id', id).select();
 
         if(error) {
             console.log(`Supabase insert error ${error}`)
