@@ -1,6 +1,7 @@
 <script lang="ts">
     import { invalidate } from '$app/navigation';
     import { error } from '@sveltejs/kit';
+    import { supabase } from '$lib/supabaseClient';
 
 
 
@@ -70,10 +71,20 @@
 
     }
 
-    async function addPost(title: string, content: string) {
+    async function addPost(title: string, content: string, file?: File[]) {
         const formData = new FormData();
         formData.append('title', title)
+
+
         formData.append('content', content)
+
+        if(file) {
+            file.forEach((f: File) => formData.append('files[]', f as Blob))
+        };
+
+        
+
+
 
         const res = await fetch('?/addBlog', {
             method: 'POST', 

@@ -29,6 +29,57 @@ export const actions: Actions = {
         const formData = await request.formData();
         const title = formData.get('title')?.toString();
         const content = formData.get('content')?.toString();
+        const file : File[]   = formData.get('files[]');
+        
+        let markdownFile : File | null = null;
+        let imageFiles : File[] = []
+        let text: string;
+
+        if(file) {
+            
+            for (const f of file) {
+                if (f.name.endsWith('.md')) markdownFile = f
+                else imageFiles.push(f);
+                text = await f.text();
+
+                const matches = [...text.matchAll(/!\[.*?\]\((.*?)\)/g)]
+                // ex. ["images/map.png", "photos/pic2.jpg"]
+                const referencedPaths = matches.map(m => m[1])
+
+                let updatedMarkdown = text;
+
+
+                for (const path of referencedPaths) {
+                    const filename = path.split("/").pop();
+                    const imageFile = imageFiles.find(f => f.name.endsWith(filename!))
+
+
+                    if(!imageFile) continue;
+ 
+                    const {data, error} = await supabase.storage.from('blog-assets').upload(`posts/${Date.now()}-${imageFile.name}`, imageFile)
+
+                    if(error) {
+                        console.log(error);
+                        continue;
+                    }
+
+
+                    const publicUrl = supabase.storage.from('blog-assets').getPublicUrl(data.path).data.publicUrl;
+
+
+                    updatedMarkdown = updatedMarkdown.replace(path, publicUrl)
+
+                }
+
+
+                formData.append('content', text);
+            }
+
+
+        } else {
+            
+        }
+        
 
         if (!title || !content) {
             return fail(400, {error: "title and content are required"});

@@ -37,7 +37,7 @@
          
         </section>
         {#if windowView === 'write'} 
-        <form on:submit={() => addPost(title, content)} >
+        <form  on:submit={() => addPost(title, content)} >
         <div class="mt-4">
             
                 <label class="text-black" for="title">Title</label>
@@ -69,7 +69,7 @@
             </div> -->
 
             <div class="mt-4 flex justify-end">
-                <button class="bg-white text-black rounded-md px-4 py-1 hover:bg-gray-200 hover:text-gray-900" id="generate-button" type="submit">Submit</button>
+                <button class="bg-white text-black rounded-md px-4 py-1 hover:bg-gray-200 hover:text-gray-900" id="generate-button"  type="submit">Submit</button>
             </div>
 
 
