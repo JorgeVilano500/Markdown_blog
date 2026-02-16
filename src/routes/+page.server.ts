@@ -29,57 +29,7 @@ export const actions: Actions = {
         const formData = await request.formData();
         const title = formData.get('title')?.toString();
         const content = formData.get('content')?.toString();
-        const file : File[]   = formData.get('files[]');
-        
-        let markdownFile : File | null = null;
-        let imageFiles : File[] = []
-        let text: string;
 
-        if(file) {
-            
-            for (const f of file) {
-                if (f.name.endsWith('.md')) markdownFile = f
-                else imageFiles.push(f);
-                text = await f.text();
-
-                const matches = [...text.matchAll(/!\[.*?\]\((.*?)\)/g)]
-                // ex. ["images/map.png", "photos/pic2.jpg"]
-                const referencedPaths = matches.map(m => m[1])
-
-                let updatedMarkdown = text;
-
-
-                for (const path of referencedPaths) {
-                    const filename = path.split("/").pop();
-                    const imageFile = imageFiles.find(f => f.name.endsWith(filename!))
-
-
-                    if(!imageFile) continue;
- 
-                    const {data, error} = await supabase.storage.from('blog-assets').upload(`posts/${Date.now()}-${imageFile.name}`, imageFile)
-
-                    if(error) {
-                        console.log(error);
-                        continue;
-                    }
-
-
-                    const publicUrl = supabase.storage.from('blog-assets').getPublicUrl(data.path).data.publicUrl;
-
-
-                    updatedMarkdown = updatedMarkdown.replace(path, publicUrl)
-
-                }
-
-
-                formData.append('content', text);
-            }
-
-
-        } else {
-            
-        }
-        
 
         if (!title || !content) {
             return fail(400, {error: "title and content are required"});
@@ -114,6 +64,29 @@ export const actions: Actions = {
 
         return {success: true, data: data }
 
+    }, 
+    addBlogByFile: async({request}: RequestEvent) => {
+        const formatData = await request.formData();
+        const file = formatData.get('file') as File;
+        const title = formatData.get('title')?.toString();
+
+        const markdownText = await file.text();
+
+        if(!markdownText || !title) return fail(400, {error: "title and file are required"})
+
+
+        const {data: blogData, error} = await supabase.from("markdown_blog_table").insert({title, markdownText}).select();
+        if(error) {
+            console.log(`Supabase insert Error ${error}`)
+            return fail(500, {error: error.message})
+        }
+
+        return {success: true, data: blogData}
+
+    }
+,
+    postManTest: async({request}: RequestEvent) => {
+        return {success: true, message: 'request successful'}
     }
 
 }
@@ -131,3 +104,58 @@ export const load: PageServerLoad = async () => {
     return {posts}
 
 }
+
+
+
+// will use for later files
+//         const file  = formData.getAll('files[]') as File[];
+        
+        // let markdownFile : File | null = null;
+        // let imageFiles : File[] = []
+        // let text: string;
+
+        // if(file) {
+            
+        //     for (const f of file) {
+        //         if (f.name.endsWith('.md')) markdownFile = f
+        //         else imageFiles.push(f);
+        //         text = await f.text();
+
+        //         const matches = [...text.matchAll(/!\[.*?\]\((.*?)\)/g)]
+        //         // ex. ["images/map.png", "photos/pic2.jpg"]
+        //         const referencedPaths = matches.map(m => m[1])
+
+        //         let updatedMarkdown = text;
+
+
+        //         for (const path of referencedPaths) {
+        //             const filename = path.split("/").pop();
+        //             const imageFile = imageFiles.find(f => f.name.endsWith(filename!))
+
+
+        //             if(!imageFile) continue;
+ 
+        //             const {data, error} = await supabase.storage.from('blog-assets').upload(`posts/${Date.now()}-${imageFile.name}`, imageFile)
+
+        //             if(error) {
+        //                 console.log(error);
+        //                 continue;
+        //             }
+
+
+        //             const publicUrl = supabase.storage.from('blog-assets').getPublicUrl(data.path).data.publicUrl;
+
+
+        //             updatedMarkdown = updatedMarkdown.replace(path, publicUrl)
+
+        //         }
+
+
+        //         formData.append('content', text);
+        //     }
+
+
+        // } else {
+            
+        // }
+        

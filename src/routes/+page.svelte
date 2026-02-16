@@ -71,17 +71,14 @@
 
     }
 
-    async function addPost(title: string, content: string, file?: File[]) {
+    async function addPost(title: string, content: string) {
         const formData = new FormData();
         formData.append('title', title)
 
 
         formData.append('content', content)
 
-        if(file) {
-            file.forEach((f: File) => formData.append('files[]', f as Blob))
-        };
-
+    
         
 
 
@@ -136,3 +133,11 @@
 
 
 </style>
+
+
+<!--   
+will use for file submissions
+if(file) {
+            file.forEach((f: File) => formData.append('files[]', f as Blob))
+        };
+ -->
