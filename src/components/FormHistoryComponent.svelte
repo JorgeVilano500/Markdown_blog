@@ -1,82 +1,122 @@
-
 <script lang="ts">
-    import { marked } from 'marked';
-    import IoIosArrowDown from 'svelte-icons/io/IoIosArrowDown.svelte'
-    import IoIosArrowUp from 'svelte-icons/io/IoIosArrowUp.svelte'
-    import GoX from 'svelte-icons/go/GoX.svelte'
-    let showBlogForm = false;
+    import { marked } from '$lib/markdown';
+
     let showPreview = false;
     let title: string;
     let content: string;
-    let editIndex:number;
+    let editIndex: number;
+    let onEdit = false;
 
     export let editPost;
     export let blogs;
-
     export let deletePost;
 
-    let onEdit = false; 
-
-    const handleSubmit = (title: string, content:string, id: string) => {
-        console.log(id);
-        editPost(title, content, id)
-        onEdit = !onEdit;
+    const handleSubmit = (t: string, c: string, id: string) => {
+        editPost(t, c, id)
+        onEdit = false;
     }
-
-   
 </script>
 
-<section class={`bg-gray-400 mx-4 rounded my-4 p-4 ${showBlogForm ? 'h-[20rem]' : 'h-auto'}  overflow-y-auto`}>
-    <button on:click={() => showBlogForm = !showBlogForm} class={`text-2xl font-bold flex flex-row justify-center mx-auto`}>Blog History {#if showBlogForm} <div  class="size-8 self-center" ><IoIosArrowUp/> </div> {:else} <div  class="size-8 self-center" ><IoIosArrowDown/> </div> {/if}</button>
+{#if blogs.length === 0}
+    <div class="flex flex-col items-center justify-center h-64">
+        <p class="text-slate-400 text-sm">No posts yet. Create your first post!</p>
+    </div>
+{:else}
+    <div class="space-y-4 max-w-3xl">
+        {#each blogs as blog, i}
+            <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
 
-   {#if showBlogForm}
-
-        {#each blogs as blog, i }
-        <div class="prose bg-white w-full h-[15rem] p-4 mx-auto my-4 rounded xl overflow-y-auto overflow-x-hidden relative">
-            
-            {#if onEdit && editIndex === i}
-                <button on:click={() => { onEdit = !onEdit;}} class="mx-2 top-2 w-auto p-2 rounded-xl right-26 absolute  bg-gray-400 transition ease-in-out hover:bg-gray-700 hover:text-white hover:cursor-pointer">Cancel</button>
-                <button on:click={() => {handleSubmit(title, content, blog.id) }} class="mx-2 top-2 w-auto p-2 rounded-xl right-12 absolute  bg-gray-400 transition ease-in-out hover:bg-gray-700 hover:text-white hover:cursor-pointer">Save</button>
-            {:else}
-                <button on:click={() => { onEdit = !onEdit; editIndex = i; content = blog?.content; title = blog?.title;}} class="top-2 w-auto p-2 rounded-xl right-12 absolute  bg-gray-400 transition ease-in-out hover:bg-gray-700 hover:text-white hover:cursor-pointer">Edit</button>
-            {/if}
-
-                <button on:click={() => deletePost(blog?.id)} class="mx-2 top-2 size-4 right-0 absolute m-4 hover:cursor-pointer"><GoX/></button>
-
-                {
-                    #if onEdit && editIndex === i
-                }
-                <div>
-            
-                    <div class="mt-4">
-                        <label class="text-black text-xl font-semibold" for="title">Title</label>
-                        <input required name="title" bind:value={title} placeholder="Enter a title for your blog" class="w-full bg-white rounded-md border-gray-300 text-black px-2 py-1" type="text">
+                <!-- Card header -->
+                <div class="px-6 py-4 flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                        <h2 class="text-base font-semibold text-slate-800 truncate">{blog.title}</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            {new Date(String(blog.created_at)).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        </p>
                     </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        {#if onEdit && editIndex === i}
+                            <button
+                                on:click={() => { onEdit = false; showPreview = false; }}
+                                class="text-xs px-3 py-1.5 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors"
+                            >Cancel</button>
+                            <button
+                                on:click={() => handleSubmit(title, content, blog.id)}
+                                class="text-xs px-3 py-1.5 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                            >Save</button>
+                        {:else}
+                            <button
+                                on:click={() => { onEdit = true; editIndex = i; content = blog?.content; title = blog?.title; showPreview = false; }}
+                                class="text-xs px-3 py-1.5 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50 transition-colors"
+                            >Edit</button>
+                        {/if}
+                        <button
+                            on:click={() => deletePost(blog?.id)}
+                            class="text-slate-400 hover:text-red-500 transition-colors p-1.5 rounded-md hover:bg-red-50"
+                            aria-label="Delete post"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
+                <!-- Card body -->
+                <div class="border-t border-slate-100 px-6 py-4">
+                    {#if onEdit && editIndex === i}
 
-                    {#if showPreview}
-                        <section>
-                            <button class={`px-2 py-1  rounded ${!showPreview ? 'bg-gray-200' : 'bg-gray-800 text-gray-200'} cursor-pointer transition ease-in-out hover:bg-gray-200 hover:text-white `} on:click={() => showPreview = !showPreview}>{showPreview ? 'Edit' : 'Preview'}</button>
-                        </section>
-                        {@html marked.parse(blog?.content)}
+                        <!-- Edit/Preview toggle -->
+                        <div class="flex gap-1 mb-4 bg-slate-100 p-1 rounded-lg w-fit">
+                            <button
+                                class={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${!showPreview ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                on:click={() => showPreview = false}
+                            >Edit</button>
+                            <button
+                                class={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${showPreview ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                                on:click={() => showPreview = true}
+                            >Preview</button>
+                        </div>
+
+                        {#if showPreview}
+                            <div class="prose prose-sm max-w-none">
+                                {@html marked.parse(content)}
+                            </div>
+                        {:else}
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1.5" for="edit-title-{i}">Title</label>
+                                    <input
+                                        id="edit-title-{i}"
+                                        bind:value={title}
+                                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        type="text"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-700 mb-1.5" for="edit-content-{i}">Content</label>
+                                    <textarea
+                                        id="edit-content-{i}"
+                                        bind:value={content}
+                                        rows="10"
+                                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                                    ></textarea>
+                                </div>
+                            </div>
+                        {/if}
+
                     {:else}
-                        <div class="mt-4">
-                            <section>
-                    <button class={`px-2 py-1  rounded ${!showPreview ? 'bg-gray-200' : 'bg-gray-800 text-gray-200'} cursor-pointer transition ease-in-out hover:bg-gray-200 hover:text-white `} on:click={() => showPreview = !showPreview}>{showPreview ? 'Edit' : 'Preview'}</button>
-                            </section>
-                            <label class="text-black text-xl font-semibold" for="description">Description</label>
-                            <textarea name="content" bind:value={content} rows="3" required placeholder="Describe your blog in detail" class="w-full bg-white rounded-md border-gray-300 text-black px-2 py-1" id="description"></textarea>
+                        <!-- Content preview with fade -->
+                        <div class="relative">
+                            <div class="prose prose-sm max-w-none max-h-36 overflow-hidden text-slate-600">
+                                {@html marked.parse(blog?.content)}
+                            </div>
+                            <div class="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
                         </div>
                     {/if}
                 </div>
-                {:else}
-                    <div>
-                        {@html marked.parse(blog?.content)}
-                    </div>
-                {/if}
-                
-        </div>
+
+            </div>
         {/each}
-  
-    {/if}    
-</section>
+    </div>
+{/if}

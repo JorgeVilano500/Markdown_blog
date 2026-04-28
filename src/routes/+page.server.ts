@@ -14,7 +14,7 @@ export const actions: Actions = {
             return {success: false, error: 'Invalid Id'}
         }
 
-        const {error} = await supabase.from('markdown_blog_table').delete().eq('id', id)
+        const {error} = await supabase.from('posts').delete().eq('id', id)
 
         if(error) {
             return {success: false, error: error.message}
@@ -29,17 +29,15 @@ export const actions: Actions = {
         const formData = await request.formData();
         const title = formData.get('title')?.toString();
         const content = formData.get('content')?.toString();
-        const file : File[]   = formData.get('files[]');
+        const file = formData.getAll('files[]') as File[];
         
-        let markdownFile : File | null = null;
         let imageFiles : File[] = []
         let text: string;
 
         if(file) {
             
             for (const f of file) {
-                if (f.name.endsWith('.md')) markdownFile = f
-                else imageFiles.push(f);
+                if (!f.name.endsWith('.md')) imageFiles.push(f);
                 text = await f.text();
 
                 const matches = [...text.matchAll(/!\[.*?\]\((.*?)\)/g)]
@@ -85,7 +83,7 @@ export const actions: Actions = {
             return fail(400, {error: "title and content are required"});
         }
 
-        const {data: blogData, error} = await supabase.from('markdown_blog_table').insert({title, content}).select()
+        const {data: blogData, error} = await supabase.from('posts').insert({title, content}).select()
 
         if (error) {
             console.log(`Supabase insert error ${error}`)
@@ -105,14 +103,14 @@ export const actions: Actions = {
             return fail(400, {error: 'Missing content, or id'})
         }
 
-        const {data, error} = await supabase.from('markdown_blog_table').update({content: content, title: title}).eq('id', id).select();
+        const {error} = await supabase.from('posts').update({content: content, title: title}).eq('id', id);
 
         if(error) {
-            console.log(`Supabase insert error ${error}`)
+            console.log(`Supabase update error: ${error.message}`)
             return fail(500, {error: error.message})
         }
 
-        return {success: true, data: data }
+        return {success: true}
 
     }
 
@@ -121,7 +119,7 @@ export const actions: Actions = {
 
 
 export const load: PageServerLoad = async () => {
-    const {data: posts, error} = await supabase.from('markdown_blog_table').select('*').order('created_at', {ascending: false})
+    const {data: posts, error} = await supabase.from('posts').select('*').order('created_at', {ascending: false})
 
     if(error) {
         console.log(`Error fetching posts: ${error.message}`)

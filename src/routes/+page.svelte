@@ -1,40 +1,30 @@
 <script lang="ts">
     import { invalidate } from '$app/navigation';
-    import { error } from '@sveltejs/kit';
-    import { supabase } from '$lib/supabaseClient';
-
-
 
     import FormComponent from '../components/FormComponent.svelte';
     import FormHistoryComponent from '../components/FormHistoryComponent.svelte'
 
     type Post = {
-            id: String; 
-            title: String;
-            created_at: String;
-            content: String
+        id: String;
+        title: String;
+        created_at: String;
+        content: String
     }
-    export let data: {
-        posts: Post[];
-    }
+    export let data: { posts: Post[] }
 
-    let blogs = data.posts 
+    let blogs = data.posts
     let title = '';
     let content = '';
+    let activeView: 'new-post' | 'posts' = 'new-post';
 
     async function deletePost(id: string) {
         const formData = new FormData();
         formData.append('id', id)
-
-        const res = await fetch('?/delete', {
-            method: 'POST', 
-            body: formData
-        })
-
-        if(res.ok){
+        const res = await fetch('?/delete', { method: 'POST', body: formData })
+        if (res.ok) {
             blogs = blogs.filter(blog => blog.id !== id)
             await invalidate('/');
-        } else  {
+        } else {
             console.error('Delete failed')
         }
     }
@@ -44,95 +34,99 @@
         formData.append('title', title)
         formData.append('content', content)
         formData.append('id', id);
-        console.log('reached')
 
-        const res = await fetch('/?editBlog', {
-            // headers: {
-            //     'Content-Type': 'application/x-www-form-urlencoded'
-            // },
-            method: 'PUT', 
-            body: formData
-        })
-
-
-        if(res.ok) {
-
+        const res = await fetch('?/editBlog', { method: 'POST', body: formData })
+        if (res.ok) {
             blogs = blogs.map(blog => {
-                if(blog.id === id) {
-                    return {...blog, content: content, title: title}
-                }
+                if (blog.id === id) return { ...blog, content, title }
                 return blog;
             })
-
             await invalidate('/')
         } else {
-            return window.alert('Edit Failed')
+            const body = await res.json().catch(() => null)
+            const message = body?.data?.error ?? `HTTP ${res.status}`
+            console.error('Edit failed:', message)
+            window.alert(`Edit failed: ${message}`)
         }
-
     }
 
     async function addPost(title: string, content: string, file?: File[]) {
         const formData = new FormData();
         formData.append('title', title)
-
-
         formData.append('content', content)
-
-        if(file) {
+        if (file) {
             file.forEach((f: File) => formData.append('files[]', f as Blob))
-        };
+        }
 
-        
-
-
-
-        const res = await fetch('?/addBlog', {
-            method: 'POST', 
-            body: formData
-        })
-
-        if(res.ok){
+        const res = await fetch('?/addBlog', { method: 'POST', body: formData })
+        if (res.ok) {
             const blogResponse = await res.json()
             const parsed = JSON.parse(blogResponse.data)
-            
-            const id = parsed[4]
-            const created_at = parsed[5];
-            const content = parsed[6];
-            const title = parsed[7];
-
             const newBlog = {
-                id: id, 
-                created_at: created_at, 
-                content: content, 
-                title: title
+                id: parsed[4],
+                created_at: parsed[5],
+                content: parsed[6],
+                title: parsed[7]
             }
-
             blogs.push(newBlog)
-
-            
-
-        //   console.log(JSON.parse(blogResponse.data))
             await invalidate('/');
-        } else  {
-            console.error('Delete failed')
+        } else {
+            console.error('Add post failed')
         }
     }
-    
 </script>
 
+<div class="flex h-screen bg-slate-50 overflow-hidden">
 
-<section>
-    <h1 class="text-center text-3xl font-semibold my-4">Write To Blog</h1>
+    <!-- Sidebar -->
+    <aside class="w-56 bg-slate-900 flex flex-col shrink-0">
+        <div class="px-5 py-5 border-b border-slate-700/60">
+            <p class="text-white font-semibold text-base tracking-tight">Markdown Blog</p>
+            <p class="text-slate-400 text-xs mt-0.5">Content Manager</p>
+        </div>
 
-    <FormComponent title={title} content={content} addPost={addPost} />
- 
+        <nav class="flex-1 px-3 py-4 space-y-1">
+            <button
+                on:click={() => activeView = 'new-post'}
+                class={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${activeView === 'new-post' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                New Post
+            </button>
 
-    <FormHistoryComponent editPost={editPost} deletePost={deletePost} blogs={blogs} />
+            <button
+                on:click={() => activeView = 'posts'}
+                class={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${activeView === 'posts' ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'}`}
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                All Posts
+                <span class="ml-auto bg-slate-700 text-slate-300 text-xs px-2 py-0.5 rounded-full">{blogs.length}</span>
+            </button>
+        </nav>
 
-</section>
+        <div class="px-5 py-4 border-t border-slate-700/60">
+            <p class="text-slate-500 text-xs">v1.0</p>
+        </div>
+    </aside>
 
-<style>
- 
+    <!-- Main area -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <header class="bg-white border-b border-slate-200 px-8 py-4 shrink-0">
+            <h1 class="text-lg font-semibold text-slate-800">
+                {activeView === 'new-post' ? 'New Post' : 'All Posts'}
+            </h1>
+        </header>
 
-
-</style>
+        <main class="flex-1 overflow-y-auto p-8">
+            {#if activeView === 'new-post'}
+                <FormComponent {title} {content} {addPost} />
+            {:else}
+                <FormHistoryComponent {editPost} {deletePost} {blogs} />
+            {/if}
+        </main>
+    </div>
+</div>

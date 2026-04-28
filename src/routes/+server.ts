@@ -21,7 +21,7 @@ export async function PUT({request}: RequestEvent) {
         return json( {error: "Title or content not present"}, {status: 400},)
     }
 
-    const {error} = await supabase.from('markdown_blog_table').update({title: title, content: content}).eq('id', Number(id));
+    const {error} = await supabase.from('posts').update({title: title, content: content}).eq('id', Number(id));
 
     if(error) {
         return json({error: error.message}, {status: 400}, )

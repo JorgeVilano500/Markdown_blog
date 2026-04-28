@@ -1,41 +1,10 @@
 @import "tailwindcss";
-
-
-div > h1 {
-    font-size: 30px;
-    font-weight: bold;
-}
-div >  h2 {
-    font-size: 22px;
-    font-weight: 600;
-}
-
-div >  h3 {
-    font-size: 18px;
-    font-weight: 500;
-}
-
-
-
-div >  p {
-    font-size: 15px;
-    font-weight: 400;
-}
-
-div >  li {
-    font-style: italic;
-}
-
-div > p > img {
-    width: 10rem;
-    height: 10rem;
-}
+@plugin "@tailwindcss/typography";
 
 @layer base {
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
+        -webkit-appearance: none;
+        margin: 0;
     }
-  } 
-  /* for internship later */
+}
