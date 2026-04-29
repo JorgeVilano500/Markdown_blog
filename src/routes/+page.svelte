@@ -76,6 +76,11 @@
     }
 </script>
 
+<svelte:head>
+    <title>Blog CMS</title>
+    <meta name="robots" content="noindex, nofollow" />
+</svelte:head>
+
 <div class="flex h-screen bg-slate-50 overflow-hidden">
 
     <!-- Sidebar -->
