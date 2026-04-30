@@ -8,7 +8,12 @@
         id: String;
         title: String;
         created_at: String;
-        content: String
+        content: String;
+        published: boolean;
+        cover_emoji: String | null;
+        excerpt: String | null;
+        tags: string[] | null;
+        theme: string | null;
     }
     export let data: { posts: Post[] }
 
@@ -29,16 +34,20 @@
         }
     }
 
-    async function editPost(title: string, content: string, id: string) {
+    async function editPost(title: string, content: string, id: string, cover_emoji?: string, excerpt?: string, tags?: string[], theme?: string) {
         const formData = new FormData();
         formData.append('title', title)
         formData.append('content', content)
         formData.append('id', id);
+        if (cover_emoji !== undefined) formData.append('cover_emoji', cover_emoji)
+        if (excerpt     !== undefined) formData.append('excerpt', excerpt)
+        if (tags        !== undefined) formData.append('tags', JSON.stringify(tags))
+        if (theme       !== undefined) formData.append('theme', theme)
 
         const res = await fetch('?/editBlog', { method: 'POST', body: formData })
         if (res.ok) {
             blogs = blogs.map(blog => {
-                if (blog.id === id) return { ...blog, content, title }
+                if (blog.id === id) return { ...blog, content, title, cover_emoji: cover_emoji ?? blog.cover_emoji, excerpt: excerpt ?? blog.excerpt, tags: tags ?? blog.tags, theme: theme ?? blog.theme }
                 return blog;
             })
             await invalidate('/')
@@ -47,6 +56,20 @@
             const message = body?.data?.error ?? `HTTP ${res.status}`
             console.error('Edit failed:', message)
             window.alert(`Edit failed: ${message}`)
+        }
+    }
+
+    async function togglePublic(id: string, current: boolean) {
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('published', String(!current));
+
+        const res = await fetch('?/togglePublic', { method: 'POST', body: formData })
+        if (res.ok) {
+            blogs = blogs.map(blog => blog.id === id ? { ...blog, published: !current } : blog)
+        } else {
+            const body = await res.json().catch(() => null)
+            console.error('Toggle failed:', body?.data?.error ?? `HTTP ${res.status}`)
         }
     }
 
@@ -66,7 +89,12 @@
                 id: parsed[4],
                 created_at: parsed[5],
                 content: parsed[6],
-                title: parsed[7]
+                title: parsed[7],
+                published: false,
+                cover_emoji: null,
+                excerpt: null,
+                tags: null,
+                theme: null
             }
             blogs.push(newBlog)
             await invalidate('/');
@@ -130,7 +158,7 @@
             {#if activeView === 'new-post'}
                 <FormComponent {title} {content} {addPost} />
             {:else}
-                <FormHistoryComponent {editPost} {deletePost} {blogs} />
+                <FormHistoryComponent {editPost} {deletePost} {togglePublic} {blogs} />
             {/if}
         </main>
     </div>

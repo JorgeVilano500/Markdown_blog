@@ -1,5 +1,8 @@
-import { supabase } from '$lib/supabaseClient';
+import { createServerSupabase } from '$lib/serverSupabaseClient';
+import { SUPABASE_SERVICE_ROLE_KEY } from '$env/static/private';
 import type { RequestHandler } from './$types';
+
+const supabase = createServerSupabase(SUPABASE_SERVICE_ROLE_KEY);
 
 export const GET: RequestHandler = async ({ url }) => {
     const { data: posts } = await supabase
@@ -9,7 +12,7 @@ export const GET: RequestHandler = async ({ url }) => {
 
     const origin = url.origin;
 
-    const postEntries = (posts ?? []).map(post => `
+    const postEntries = (posts ?? []).map((post: { id: string; created_at: string }) => `
   <url>
     <loc>${origin}/posts/${post.id}</loc>
     <lastmod>${new Date(post.created_at).toISOString().split('T')[0]}</lastmod>
