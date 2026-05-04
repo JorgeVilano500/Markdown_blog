@@ -28,14 +28,19 @@ export const actions: Actions = {
 
     addBlog: async ({request}: RequestEvent) => {
         const formData = await request.formData();
-        const title = formData.get('title')?.toString();
-        const content = formData.get('content')?.toString();
+        const title       = formData.get('title')?.toString();
+        const content     = formData.get('content')?.toString();
+        const cover_emoji = formData.get('cover_emoji')?.toString() || null;
+        const excerpt     = formData.get('excerpt')?.toString() || null;
+        const tagsRaw     = formData.get('tags')?.toString();
+        const tags        = tagsRaw ? JSON.parse(tagsRaw) : null;
+        const theme       = formData.get('theme')?.toString() || null;
 
         if (!title || !content) {
             return fail(400, {error: 'title and content are required'});
         }
 
-        const {data: blogData, error} = await supabase.from('posts').insert({title, content}).select()
+        const {data: blogData, error} = await supabase.from('posts').insert({title, content, cover_emoji, excerpt, tags, theme}).select()
 
         if (error) {
             console.log(`Supabase insert error: ${error.message}`)

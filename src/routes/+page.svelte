@@ -73,13 +73,17 @@
         }
     }
 
-    async function addPost(title: string, content: string, file?: File[]) {
+    async function addPost(title: string, content: string, file?: File[], cover_emoji?: string, excerpt?: string, tags?: string[], theme?: string) {
         const formData = new FormData();
         formData.append('title', title)
         formData.append('content', content)
         if (file) {
             file.forEach((f: File) => formData.append('files[]', f as Blob))
         }
+        if (cover_emoji) formData.append('cover_emoji', cover_emoji)
+        if (excerpt)     formData.append('excerpt', excerpt)
+        if (tags?.length) formData.append('tags', JSON.stringify(tags))
+        if (theme)       formData.append('theme', theme)
 
         const res = await fetch('?/addBlog', { method: 'POST', body: formData })
         if (res.ok) {
@@ -91,10 +95,10 @@
                 content: parsed[6],
                 title: parsed[7],
                 published: false,
-                cover_emoji: null,
-                excerpt: null,
-                tags: null,
-                theme: null
+                cover_emoji: cover_emoji ?? null,
+                excerpt: excerpt ?? null,
+                tags: tags ?? null,
+                theme: theme ?? null
             }
             blogs.push(newBlog)
             await invalidate('/');
