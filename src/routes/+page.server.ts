@@ -36,11 +36,13 @@ export const actions: Actions = {
         const tags        = tagsRaw ? JSON.parse(tagsRaw) : null;
         const theme       = formData.get('theme')?.toString() || null;
 
+        const slug = title?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
+
         if (!title || !content) {
             return fail(400, {error: 'title and content are required'});
         }
 
-        const {data: blogData, error} = await supabase.from('posts').insert({title, content, cover_emoji, excerpt, tags, theme}).select()
+        const {data: blogData, error} = await supabase.from('posts').insert({title, content, cover_emoji, excerpt, tags, theme, slug}).select()
 
         if (error) {
             console.log(`Supabase insert error: ${error.message}`)

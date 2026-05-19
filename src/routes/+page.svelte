@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { invalidate } from '$app/navigation';
+    import { invalidate, invalidateAll } from '$app/navigation';
 
     import FormComponent from '../components/FormComponent.svelte';
     import FormHistoryComponent from '../components/FormHistoryComponent.svelte'
@@ -73,7 +73,7 @@
         }
     }
 
-    async function addPost(title: string, content: string, file?: File[], cover_emoji?: string, excerpt?: string, tags?: string[], theme?: string) {
+    async function addPost(title: string, content: string, file?: File[], cover_emoji?: string, excerpt?: string, tags?: string[], theme?: string): Promise<boolean> {
         const formData = new FormData();
         formData.append('title', title)
         formData.append('content', content)
@@ -87,23 +87,15 @@
 
         const res = await fetch('?/addBlog', { method: 'POST', body: formData })
         if (res.ok) {
-            const blogResponse = await res.json()
-            const parsed = JSON.parse(blogResponse.data)
-            const newBlog = {
-                id: parsed[4],
-                created_at: parsed[5],
-                content: parsed[6],
-                title: parsed[7],
-                published: false,
-                cover_emoji: cover_emoji ?? null,
-                excerpt: excerpt ?? null,
-                tags: tags ?? null,
-                theme: theme ?? null
-            }
-            blogs.push(newBlog)
-            await invalidate('/');
+            await invalidateAll();
+            blogs = data.posts;
+            return true;
         } else {
-            console.error('Add post failed')
+            const body = await res.json().catch(() => null)
+            const message = body?.data?.error ?? `HTTP ${res.status}`
+            console.error('Add post failed:', message)
+            window.alert(`Add post failed: ${message}`)
+            return false;
         }
     }
 </script>
@@ -160,7 +152,7 @@
 
         <main class="flex-1 overflow-y-auto p-8">
             {#if activeView === 'new-post'}
-                <FormComponent {title} {content} {addPost} />
+                <FormComponent {title} {content} {addPost} onViewPosts={() => activeView = 'posts'} />
             {:else}
                 <FormHistoryComponent {editPost} {deletePost} {togglePublic} {blogs} />
             {/if}
